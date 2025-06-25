@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cloud Monitoring Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Cloud Monitoring Dashboard</h1>
+    <canvas id="metricsChart"></canvas>
+    <script>
+        fetch('/monitoring_app/api/metrics/')
+            .then(response => response.json())
+            .then(data => {
+                console.log(data)
+                const ctx = document.getElementById('metricsChart').getContext('2d');
+                const chart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.map(entry => entry.timestamp),
+                        datasets: [{
+                            label: 'CPU Utilization',
+                            data: data.map(entry => entry.average),
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1,
+                            fill: false
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            x: {
+                                type: 'time',
+                                time: {
+                                    unit: 'minute'
+                                }
+                            },
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            });
+    </script>
+</body>
+</html>

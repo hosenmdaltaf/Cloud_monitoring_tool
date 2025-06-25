@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud Metrics Dashboard</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/date-fns@2.21.1"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@2.0.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mt-5">Cloud Metrics Dashboard</h1>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        CPU Utilization
+                    </div>
+                    <div class="card-body">
+                        <canvas id="cpuUtilizationChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        Memory Utilization
+                    </div>
+                    <div class="card-body">
+                        <canvas id="memoryUtilizationChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        Disk Utilization
+                    </div>
+                    <div class="card-body">
+                        <canvas id="diskUtilizationChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        Network In
+                    </div>
+                    <div class="card-body">
+                        <canvas id="networkInChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        Network Out
+                    </div>
+                    <div class="card-body">
+                        <canvas id="networkOutChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        CPU Credit Balance
+                    </div>
+                    <div class="card-body">
+                        <canvas id="cpuCreditBalanceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        Disk Read Ops
+                    </div>
+                    <div class="card-body">
+                        <canvas id="diskReadOpsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        Disk Write Ops
+                    </div>
+                    <div class="card-body">
+                        <canvas id="diskWriteOpsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        Network Packets In
+                    </div>
+                    <div class="card-body">
+                        <canvas id="networkPacketsInChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        Network Packets Out
+                    </div>
+                    <div class="card-body">
+                        <canvas id="networkPacketsOutChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const data = {{ data|safe }};
+        
+        function parseData(rawData, key, subKey) {
+            return rawData[key].map(dp => ({
+                x: new Date(dp.Timestamp),
+                y: dp[subKey]
+            }));
+        }
+
+        function createChart(ctx, label, dataKey, dataSubKey, yMax = 100) {
+            return new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: [{
+                        label: label,
+                        data: parseData(data, dataKey, dataSubKey),
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        fill: false,
+                    }]
+                },
+                options: {
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: 'minute'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            max: yMax
+                        }
+                    }
+                }
+            });
+        }
+
+        // Create charts
+        createChart(document.getElementById('cpuUtilizationChart').getContext('2d'), 'CPU Utilization (%)', 'cpu_utilization', 'Average');
+        createChart(document.getElementById('memoryUtilizationChart').getContext('2d'), 'Memory Utilization (%)', 'memory_utilization', 'Average');
+        createChart(document.getElementById('diskUtilizationChart').getContext('2d'), 'Disk Utilization (%)', 'disk_utilization', 'Average');
+        createChart(document.getElementById('networkInChart').getContext('2d'), 'Network In (Bytes)', 'network_in', 'Sum', null);
+        createChart(document.getElementById('networkOutChart').getContext('2d'), 'Network Out (Bytes)', 'network_out', 'Sum', null);
+        createChart(document.getElementById('cpuCreditBalanceChart').getContext('2d'), 'CPU Credit Balance (Count)', 'cpu_credit_balance', 'Sum', null);
+        createChart(document.getElementById('diskReadOpsChart').getContext('2d'), 'Disk Read Ops (Count)', 'disk_read_ops', 'Sum', null);
+        createChart(document.getElementById('diskWriteOpsChart').getContext('2d'), 'Disk Write Ops (Count)', 'disk_write_ops', 'Sum', null);
+        createChart(document.getElementById('networkPacketsInChart').getContext('2d'), 'Network Packets In (Count)', 'network_packets_in', 'Sum', null);
+        createChart(document.getElementById('networkPacketsOutChart').getContext('2d'), 'Network Packets Out (Count)', 'network_packets_out', 'Sum', null);
+    </script>
+</body>
+</html>
